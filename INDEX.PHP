@@ -1,155 +1,94 @@
-<?php
-include 'config/database.php';
-
-// Ambil data mahasiswa & jadwal untuk dropdown
-$mahasiswa_result = mysqli_query($kon, "SELECT id_mahasiswa, nama_mahasiswa FROM mahasiswa");
-$jadwal_result = mysqli_query($kon, "SELECT id_jadwal, nama_matkul FROM jadwal"); // Pastikan tabel jadwal dan nama_matkul ada
-
-// Tambah absensi
-if (isset($_POST['simpan'])) {
-    $cek = mysqli_query($kon, "SELECT MAX(id_absensi) as max_id FROM absensi");
-    $data = mysqli_fetch_assoc($cek);
-    $id_baru = $data['max_id'] + 1;
-
-    $id_jadwal = $_POST['id_jadwal'];
-    $id_mahasiswa = $_POST['id_mahasiswa'];
-    $tanggal = $_POST['tanggal'];
-    $status = $_POST['status_kehadiran'];
-
-    mysqli_query($kon, "INSERT INTO absensi (id_absensi, id_jadwal, id_mahasiswa, tanggal, status_kehadiran)
-        VALUES ('$id_baru', '$id_jadwal', '$id_mahasiswa', '$tanggal', '$status')");
-
-    header("Location: absensi.php");
-}
-
-// Update absensi
-if (isset($_POST['update'])) {
-    $id = $_POST['id_absensi'];
-    $id_jadwal = $_POST['id_jadwal'];
-    $id_mahasiswa = $_POST['id_mahasiswa'];
-    $tanggal = $_POST['tanggal'];
-    $status = $_POST['status_kehadiran'];
-
-    mysqli_query($kon, "UPDATE absensi SET id_jadwal='$id_jadwal', id_mahasiswa='$id_mahasiswa',
-        tanggal='$tanggal', status_kehadiran='$status' WHERE id_absensi='$id'");
-
-    header("Location: absensi.php");
-}
-
-// Hapus absensi
-if (isset($_GET['hapus'])) {
-    $id = $_GET['hapus'];
-    mysqli_query($kon, "DELETE FROM absensi WHERE id_absensi='$id'");
-    header("Location: absensi.php");
-}
-
-// Edit absensi
-$edit = false;
-$data_edit = [];
-if (isset($_GET['edit'])) {
-    $edit = true;
-    $id = $_GET['edit'];
-    $result = mysqli_query($kon, "SELECT * FROM absensi WHERE id_absensi='$id'");
-    $data_edit = mysqli_fetch_assoc($result);
-}
-?>
-
 <!DOCTYPE html>
 <html>
-<head><title>Data Absensi Mahasiswa</title></head>
+<head>
+    <title>Sistem Akademik Zamelda</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+        }
+        .sidebar {
+            width: 220px;
+            background-color: #2c3e50;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            display: block;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: #34495e;
+        }
+        .content {
+            margin-left: 220px;
+            padding: 20px;
+            width: calc(100% - 220px);
+            height: 100vh;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
 <body>
-<h2 align="center">Data Absensi Mahasiswa</h2>
+    <div class="sidebar">
+        <h2 style="text-align:center;">Zamelda</h2>
+        <a href="index.php">🏠 Beranda</a>
+        <a href="index.php?page=mahasiswa">👨‍🎓 Mahasiswa</a>
+        <a href="index.php?page=dosen">👨‍🏫 Dosen</a>
+        <a href="index.php?page=krs">📘 KRS</a>
+        <a href="index.php?page=absensi">📝 Absensi</a>
+        <a href="index.php?page=jadwal_kuliah">📅 Jadwal Kuliah</a>
+        <a href="index.php?page=nilai">📊 Nilai</a>
+        <a href="index.php?page=mata_kuliah">📚 Mata Kuliah</a>
+        <a href="index.php?page=registrasi">🗂️ Registrasi</a>
+        <a href="index.php?page=pembayaran">💰 Pembayaran</a>
+        <a href="index.php?page=ruangan">🏢 Ruangan</a>
+        <a href="index.php?page=program_studi">🎓 Program Studi</a>
+        <a href="index.php?page=dosen_wali">🧑‍💼 Dosen Wali</a>
+    </div>
 
-<form method="post" action="">
-    <?php if ($edit): ?>
-        <input type="hidden" name="id_absensi" value="<?= $data_edit['id_absensi'] ?>">
-    <?php endif; ?>
-    <table align="center" cellpadding="5">
-        <tr>
-            <td>Mahasiswa</td>
-            <td>
-                <select name="id_mahasiswa" required>
-                    <option value="">-- Pilih Mahasiswa --</option>
-                    <?php
-                    mysqli_data_seek($mahasiswa_result, 0);
-                    while ($m = mysqli_fetch_assoc($mahasiswa_result)):
-                    ?>
-                        <option value="<?= $m['id_mahasiswa'] ?>" <?= ($edit && $data_edit['id_mahasiswa'] == $m['id_mahasiswa']) ? 'selected' : '' ?>>
-                            <?= $m['nama_mahasiswa'] ?>
-                        </option>
-                    <?php endwhile; ?>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td>Jadwal</td>
-            <td>
-                <select name="id_jadwal" required>
-                    <option value="">-- Pilih Jadwal --</option>
-                    <?php while ($j = mysqli_fetch_assoc($jadwal_result)): ?>
-                        <option value="<?= $j['id_jadwal'] ?>" <?= ($edit && $data_edit['id_jadwal'] == $j['id_jadwal']) ? 'selected' : '' ?>>
-                            <?= $j['nama_matkul'] ?>
-                        </option>
-                    <?php endwhile; ?>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td>Tanggal</td>
-            <td><input type="date" name="tanggal" required value="<?= $data_edit['tanggal'] ?? '' ?>"></td>
-        </tr>
-        <tr>
-            <td>Status Kehadiran</td>
-            <td>
-                <select name="status_kehadiran" required>
-                    <option value="">-- Pilih Status --</option>
-                    <option value="Hadir" <?= ($edit && $data_edit['status_kehadiran'] == 'Hadir') ? 'selected' : '' ?>>Hadir</option>
-                    <option value="Izin" <?= ($edit && $data_edit['status_kehadiran'] == 'Izin') ? 'selected' : '' ?>>Izin</option>
-                    <option value="Sakit" <?= ($edit && $data_edit['status_kehadiran'] == 'Sakit') ? 'selected' : '' ?>>Sakit</option>
-                    <option value="Alpa" <?= ($edit && $data_edit['status_kehadiran'] == 'Alpa') ? 'selected' : '' ?>>Alpa</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2" align="right">
-                <button type="submit" name="<?= $edit ? 'update' : 'simpan' ?>"><?= $edit ? 'Update' : 'Simpan' ?></button>
-                <?php if ($edit): ?><a href="absensi.php">Batal</a><?php endif; ?>
-            </td>
-        </tr>
-    </table>
-</form>
-
-<br>
-
-<table border="1" align="center" cellpadding="8" cellspacing="0">
-    <tr>
-        <th>ID</th>
-        <th>Nama Mahasiswa</th>
-        <th>Mata Kuliah</th>
-        <th>Tanggal</th>
-        <th>Status</th>
-        <th>Aksi</th>
-    </tr>
-    <?php
-    $q = mysqli_query($kon, "SELECT a.*, m.nama_mahasiswa, j.nama_matkul
-                             FROM absensi a
-                             LEFT JOIN mahasiswa m ON a.id_mahasiswa = m.id_mahasiswa
-                             LEFT JOIN jadwal j ON a.id_jadwal = j.id_jadwal
-                             ORDER BY a.id_absensi ASC");
-    while ($row = mysqli_fetch_assoc($q)) {
-        echo "<tr>
-            <td>{$row['id_absensi']}</td>
-            <td>{$row['nama_mahasiswa']}</td>
-            <td>{$row['nama_matkul']}</td>
-            <td>{$row['tanggal']}</td>
-            <td>{$row['status_kehadiran']}</td>
-            <td>
-                <a href='?edit={$row['id_absensi']}'>Edit</a> |
-                <a href='?hapus={$row['id_absensi']}' onclick=\"return confirm('Yakin?')\">Hapus</a>
-            </td>
-        </tr>";
-    }
-    ?>
-</table>
+    <div class="content">
+        <?php
+        if (isset($_GET['page'])) {
+            $page = basename($_GET['page']) . ".php";
+            if (file_exists($page)) {
+                echo "<iframe src='$page'></iframe>";
+            } else {
+                echo "<h3>Halaman tidak ditemukan.</h3>";
+            }
+        } else {
+            echo "
+            <div style='
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100%;
+                flex-direction: column;
+                text-align: center;
+            '>
+                <h2>Selamat Datang di Sistem Akademik Zamelda</h2>
+                <p>Silakan pilih menu di sebelah kiri untuk mengelola data akademik.</p>
+                <br></br>
+                <br></br>
+                <p>Anggota:</p>
+                <ul>
+                    <p>Raesyitha Elga Rolobessy | 06.2023.107695</p>
+                    <p>Madadina Adilah Pamuji | 06.2023.1.07725</p>
+                    <p>Nazwa Zahira E.A | 06.2023.1.07739</p>
+                </ul>
+            </div>";
+        }
+        ?>
+    </div>
 </body>
 </html>

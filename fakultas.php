@@ -1,7 +1,8 @@
 <?php
 include 'config/database.php';
 
-// SIMPAN
+$dosen_result = mysqli_query($kon, "SELECT nama_dosen FROM dosen");
+
 if (isset($_POST['simpan'])) {
     $cek = mysqli_query($kon, "SELECT MAX(id_fakultas) as max_id FROM fakultas");
     $data = mysqli_fetch_assoc($cek);
@@ -15,7 +16,6 @@ if (isset($_POST['simpan'])) {
     header("Location: fakultas.php");
 }
 
-// UPDATE
 if (isset($_POST['update'])) {
     $id = $_POST['id_fakultas'];
     $nama_fakultas = $_POST['nama_fakultas'];
@@ -26,14 +26,12 @@ if (isset($_POST['update'])) {
     header("Location: fakultas.php");
 }
 
-// HAPUS
 if (isset($_GET['hapus'])) {
     $id = $_GET['hapus'];
     mysqli_query($kon, "DELETE FROM fakultas WHERE id_fakultas='$id'");
     header("Location: fakultas.php");
 }
 
-// EDIT MODE
 $edit = false;
 $data_edit = [];
 if (isset($_GET['edit'])) {
@@ -63,7 +61,20 @@ if (isset($_GET['edit'])) {
         </tr>
         <tr>
             <td>Nama Dekan</td>
-            <td><input type="text" name="nama_dekan" required value="<?= $data_edit['nama_dekan'] ?? '' ?>"></td>
+            <td>
+                <select name="nama_dekan" required>
+                    <option value="">-- Pilih Dosen sebagai Dekan --</option>
+                    <?php
+                    mysqli_data_seek($dosen_result, 0);
+                    while ($d = mysqli_fetch_assoc($dosen_result)):
+                        $selected = ($edit && $data_edit['nama_dekan'] == $d['nama_dosen']) ? 'selected' : '';
+                    ?>
+                        <option value="<?= $d['nama_dosen'] ?>" <?= $selected ?>>
+                            <?= $d['nama_dosen'] ?>
+                        </option>
+                    <?php endwhile; ?>
+                </select>
+            </td>
         </tr>
         <tr>
             <td colspan="2" align="right">

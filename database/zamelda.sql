@@ -297,10 +297,7 @@ INSERT INTO `mata_kuliah` (`id_matkul`, `kode_matkul`, `nama_matkul`, `sks`, `se
 CREATE TABLE `nilai` (
   `id_nilai` int NOT NULL,
   `id_mahasiswa` int DEFAULT NULL,
-  `id_matkul` int DEFAULT NULL,INSERT INTO `jadwal_kuliah` (`id_jadwal`, `id_matkul`, `id_dosen`, `hari`, `jam_mulai`, `jam_selesai`, `id_ruangan`, `tahun_akademik`) VALUES
-(7, 4, 1, 'Rabu', '08:00:00', '10:00:00', 4, 2024);
-INSERT INTO `jadwal_kuliah` (`id_jadwal`, `id_matkul`, `id_dosen`, `hari`, `jam_mulai`, `jam_selesai`, `id_ruangan`, `tahun_akademik`) VALUES
-(8, 2, 1, 'Kamis', '08:00:00', '10:00:00', 4, 2021);  `SKS` int DEFAULT NULL,
+  `id_matkul` int DEFAULT NULL, `SKS` int DEFAULT NULL,
   `semester` varchar(20) NOT NULL,
   `tahun_akademik` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
