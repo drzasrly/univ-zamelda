@@ -8,4 +8,5 @@
     if (!$kon){
           die("Koneksi gagal:".mysqli_connect_error());
     }
+    echo "Koneksi berhasil ke database $db pada host $host dengan user $user.<br>";
 ?>
